@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+
+<html xmlns:py="http://genshi.edgewall.org/" 
+      xmlns="http://www.w3.org/1999/xhtml">
+
+<?python
+
+import pylons
+
+?>
+
+<head>
+<title>Demo Map page for ${c.fcName}</title>
+
+<script src="http://www.openlayers.org/api/OpenLayers.js" type="text/javascript"></script>
+
+<script src="${pylons.url('/demo.js', qualified=True)}" type="text/javascript"></script>
+
+<script type="text/javascript">
+var fcURL = "${pylons.url(controller='csmlwms', fileoruri=c.fcName)}";
+</script>
+
+<style type="text/css">
+
+DIV#map {
+    width: 520px;
+    height: 260px;
+    background=color: white;
+    margin: 1px;
+    border: 1px solid #222277;
+}
+
+DIV#panel {
+    border: 2px solid red;
+}
+
+</style>
+
+</head>
+
+<body onload="init()">
+  
+  <h1>Demo Map page for ${c.fcName}</h1>
+  
+
+  <div id="map"/>
+  <div id="panel"/>
+
+  <h2>Features Available</h2>
+  
+  <select name="feature" onchange="setLayer(this.value)">
+    <option value="">Unset</option>
+    <option py:for="f_id in c.featureCollection.getFeatureList()">${f_id}</option>
+  </select>
+</body>
+
+</html>

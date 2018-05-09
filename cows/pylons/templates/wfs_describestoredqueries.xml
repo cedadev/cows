@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<?python 
+from genshi import XML
+?>
+
+<DescribeStoredQueriesResponse xmlns:py="http://genshi.edgewall.org/"  xmlns:ows="http://www.opengis.net/ows/1.1" xmlns="http://www.opengis.net/wfs/2.0"  xmlns:gml="http://www.opengis.net/gml">	
+	<StoredQueryDescription py:for="queryid in c.storedqueries" id="${queryid}">
+		<?python 
+		querydesc=c.storedqueries[queryid][0] 
+		?>
+	    <Abstract py:content="querydesc.abstract"/>
+	    <ows:Metadata  py:content="querydesc.metadata"></ows:Metadata>
+	    <Parameter py:for="param in querydesc.parameter" name="${param.name}" type="${param.type}"></Parameter>
+	 <!--!   <QueryExpressionText returnFeatureTypes="${querydesc.queryExpressionText.returnFeatureType}" language="${querydesc.queryExpressionText.language}"></QueryExpressionText> -->	    
+	</StoredQueryDescription>	
+</DescribeStoredQueriesResponse>

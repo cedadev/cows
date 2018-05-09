@@ -1,0 +1,12 @@
+import logging
+
+from {{package}}.lib.base import *
+
+log = logging.getLogger(__name__)
+
+class DemoController(BaseController):
+
+    def index(self, fileoruri):
+        c.featureCollection = globalCSMLConnector.getCsmlDoc(fileoruri)
+        c.fcName = fileoruri
+        return render('demo')

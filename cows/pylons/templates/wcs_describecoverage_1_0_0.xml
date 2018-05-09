@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<?python
+
+from cows.pylons.genshi_util import RenameElementFilter
+from genshi import QName
+
+?>
+
+  <?python  
+def getCRSList(boundingBoxes):
+""" Builds a string of CRS names   from bounding boxes  """
+crsstr=''
+for bb in boundingBoxes:
+	crsstr=crsstr + bb.crs + ' '
+if len(crsstr) > 0:
+	crsstr=crsstr[:-1] #strip last space
+if crsstr=='': 
+   crsstr='EPSG:4326 WGS84' #default
+return crsstr
+  ?>
+
+<CoverageDescription  xmlns="http://www.opengis.net/wcs" xmlns:py="http://genshi.edgewall.org/" xmlns:gml="http://www.opengis.net/gml" xmlns:ows="http://www.opengis.net/ows" version="1.0.0">
+	<CoverageOffering py:for="cd in c.descriptions">	
+		<description py:if="cd.abstracts is not None" py:content="cd.abstracts"/>            
+        <name py:content="cd.identifier"/>        
+        <label py:if="cd.titles is not None" py:content="cd.titles"/>        
+        <lonLatEnvelope py:for="bb in cd.wgs84BoundingBoxes">
+                    <gml:pos>${bb.lowerCorner[0]}  ${bb.lowerCorner[1]}</gml:pos>
+                    <gml:pos>${bb.upperCorner[0]}  ${bb.upperCorner[1]}</gml:pos>
+        </lonLatEnvelope>
+		<keywords py:if = "len(cd.keywords)>0" >
+            <keyword py:for="key in cd.keywords" py:content="key" />        
+        </keywords>
+        <domainSet>
+            <spatialDomain>
+                <!--! TO DO - nD crs -->
+                <gml:Envelope py:for="bb in cd.boundingBoxes" srsName="${bb.crs}">
+                    <gml:pos>${bb.lowerCorner[0]}  ${bb.lowerCorner[1]}</gml:pos>
+                    <gml:pos>${bb.upperCorner[0]}  ${bb.upperCorner[1]}</gml:pos>
+                </gml:Envelope>
+            </spatialDomain>
+            <temporalDomain>
+				<gml:timePosition py:for="timepos in cd.timePositions" py:content="timepos"/>
+                <timePeriod>
+                    <beginPosition>${cd.timeLimits[0]}</beginPosition>
+                    <endPosition>${cd.timeLimits[1]}</endPosition>
+                </timePeriod>
+            </temporalDomain>
+        </domainSet>
+        <rangeSet>
+            <RangeSet>
+                <name>rangeset name</name>
+                <label>rangeset label</label>    
+				<axisDescription py:for="axis in cd.axisDescriptions">
+					<AxisDescription>
+						<name py:content="axis.name"/>
+						<label py:content="axis.label"/>
+						<values>
+							<singleValue  py:for="value in axis.values" py:content="value"/>
+						</values>
+					</AxisDescription>
+				</axisDescription>            
+            </RangeSet>
+        </rangeSet>
+        <supportedCRSs>
+            <requestCRSs>${getCRSList(cd.boundingBoxes)}</requestCRSs>
+            <responseCRSs>${getCRSList(cd.boundingBoxes)}</responseCRSs>
+        </supportedCRSs>
+        <supportedFormats>
+            <formats>cf-netcdf</formats>
+        </supportedFormats>
+        <supportedInterpolations>
+            <interpolationMethod>none</interpolationMethod>
+        </supportedInterpolations>
+    </CoverageOffering>		
+</CoverageDescription>

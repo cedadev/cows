@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+
+<?python
+
+from genshi import QName
+from pylons import config, request, url
+
+if 'cows.cowsclienturl' in config:
+	cowsclient = True
+	cowsclienturl=config['cows.cowsclienturl']
+	serverurl='http://%s'%(request.environ['HTTP_HOST'])
+else:
+	cowsclient = False	
+
+#need to handle wfs only features separately so sort into two lists
+wfsonly=list(c.wfsonly)
+allwxs=[]
+
+		
+for fc in c.featureCollections:
+	if fc not in wfsonly:
+		allwxs.append(fc)
+		   
+?>
+<html xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      >
+  <head>
+    <title>COWS Server Catalogue</title>
+  </head>
+  
+  <body>
+    <h1>COWS Server Catalogue</h1>
+	<h2>Services available:</h2>
+	<ul  py:for="fc in allwxs">
+      <li py:if="cowsclient==True">${fc}
+        [<a href="${url(controller='csmlwms', fileoruri=fc, id=None,
+                            request='GetCapabilities', service='WMS')}"
+			    >WMS</a>]
+	    [<a href="${url(controller='csmlwcs', fileoruri=fc, id=None,
+	                    request='GetCapabilities', service='WCS')}"
+			    >WCS</a>]
+	    [<a href="${url(controller='csmlwfs', fileoruri=fc, id=None, 
+	                    request='GetCapabilities', service='WFS')}"
+			    >WFS</a>]
+        [<a href="${url(cowsclienturl) + 'ENDPOINT=' + serverurl +url(controller='csmlwms', fileoruri=fc, id=None)}"
+			    >Visualize</a>]
+      </li>
+	  <li py:if="cowsclient!=True">${fc}
+        [<a href="${url(controller='csmlwms', fileoruri=fc, id=None,
+                            request='GetCapabilities', service='WMS')}"
+			    >WMS</a>]
+	    [<a href="${url(controller='csmlwcs', fileoruri=fc, id=None,
+	                    request='GetCapabilities', service='WCS')}"
+			    >WCS</a>]
+	    [<a href="${url(controller='csmlwfs', fileoruri=fc, id=None, 
+	                    request='GetCapabilities', service='WFS')}"
+			    >WFS</a>]
+	    [<a href="${url(controller='demo', fileoruri=fc)}"
+			    >Demo</a>]
+      </li>	
+    </ul>
+	<ul  py:for="fc in wfsonly">
+      <li >${fc}
+	    [<a href="${url(controller='csmlwfs', fileoruri=fc, id=None, 
+	                    request='GetCapabilities', service='WFS')}"
+			    >WFS</a>]
+      </li> 
+	</ul>
+  </body>
+</html>

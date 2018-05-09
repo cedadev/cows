@@ -1,0 +1,7 @@
+<PAMDataset>
+  <SRS>PROJCS[&quot;OSGB 1936 / British National Grid&quot;,GEOGCS[&quot;OSGB 1936&quot;,DATUM[&quot;OSGB_1936&quot;,SPHEROID[&quot;Airy 1830&quot;,6377563.396,299.3249646,AUTHORITY[&quot;EPSG&quot;,&quot;7001&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6277&quot;]],PRIMEM[&quot;Greenwich&quot;,0,AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],UNIT[&quot;degree&quot;,0.01745329251994328,AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;4277&quot;]],UNIT[&quot;metre&quot;,1,AUTHORITY[&quot;EPSG&quot;,&quot;9001&quot;]],PROJECTION[&quot;Transverse_Mercator&quot;],PARAMETER[&quot;latitude_of_origin&quot;,49],PARAMETER[&quot;central_meridian&quot;,-2],PARAMETER[&quot;scale_factor&quot;,0.9996012717],PARAMETER[&quot;false_easting&quot;,400000],PARAMETER[&quot;false_northing&quot;,-100000],AUTHORITY[&quot;EPSG&quot;,&quot;27700&quot;]]</SRS>
+  <GeoTransform> -2.0000000000000000e+05,  2.2375000000000000e+03,  0.0000000000000000e+00,  1.2450000000000000e+06,  0.0000000000000000e+00, -2.3120000000000000e+03</GeoTransform>
+  <Metadata domain="IMAGE_STRUCTURE">
+    <MDI key="INTERLEAVE">PIXEL</MDI>
+  </Metadata>
+</PAMDataset>

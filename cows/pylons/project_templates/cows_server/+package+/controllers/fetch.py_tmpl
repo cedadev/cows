@@ -1,0 +1,11 @@
+'''
+Created on 28 Jul 2009
+
+@author: domlowe
+'''
+
+from {{package}}.lib.base import *
+from cows.pylons.wxs_fetchcontroller import WXSFetchController
+
+class FetchController(WXSFetchController):
+        pass

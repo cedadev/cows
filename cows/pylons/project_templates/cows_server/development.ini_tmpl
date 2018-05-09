@@ -1,0 +1,90 @@
+#
+# OGCServices - Pylons development environment configuration
+#
+# The %(here)s variable will be replaced with the parent directory of this file
+#
+[DEFAULT]
+debug = true
+# Uncomment and replace with the address which should receive any error reports
+#email_to = you@yourdomain.com
+smtp_server = localhost
+error_email_from = paste@localhost
+
+[server:main]
+use = egg:Paste#http
+host = 127.0.0.1
+port = 5000
+
+[app:main]
+use = egg:{{egg}}
+full_stack = true
+cache_dir = %(here)s/data
+
+##############################################################################
+# COWS configuration
+#
+
+# Set to pylons if you want WMS calls to be handled by the pylons debugger.
+# Else WMS exceptions will be raised
+cows.exception_type = pylons
+
+# Point to the service-level OWS configuration file
+cows.capabilities_config = %(here)s/capabilities.cfg
+cows.csml.tmpdir = %(here)s/tmp
+cows.csml.csmlstore = {{csmlstore}}
+cows.csml.colourmap = jet
+cows.csml.publish_dir = %(here)s/publish
+cows.csml.wfsconfig = %(here)s/wfs.cfg
+cows.csml.legendfont= /usr/share/fonts/truetype/msttcorefonts/arial.ttf  #modify this path to render the legend
+cows.browser_caching_enabled = false
+
+#symlink checker settings, check interval is in minutes
+#the csml directory is searched periodically for broken symlinks
+#if email settings are configured, email is sent, else just messages are written to log
+ 
+#cows.csml.symlink_check_interval = 60
+#cows.csml.send_symlink_warnings_to = username@xyz.com, username2@xyz.com
+#cows.csml.send_symlink_warnings_from = pylons@abc.com
+#cows.csml.symlink_warnings_smtp = outbox.x.y.z.com
+
+
+##############################################################################
+
+beaker.session.key = ogcservices
+beaker.session.secret = somesecret
+
+
+# If you'd like to fine-tune the individual locations of the cache data dirs
+# for the Cache data, or the Session saves, un-comment the desired settings
+# here:
+#beaker.cache.data_dir = %(here)s/data/cache
+#beaker.session.data_dir = %(here)s/data/sessions
+
+# WARNING: *THE LINE BELOW MUST BE UNCOMMENTED ON A PRODUCTION ENVIRONMENT*
+# Debug mode will enable the interactive debugging tool, allowing ANYONE to
+# execute malicious code after an exception is raised.
+#set debug = false
+
+# Logging configuration
+[loggers]
+keys = root
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = INFO
+handlers = console
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(asctime)s,%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S

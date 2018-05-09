@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+
+<?python
+
+from cows.pylons.genshi_util import RenameElementFilter
+from genshi import QName
+from pylons import url
+
+?>
+
+<WFS_Capabilities xmlns:py="http://genshi.edgewall.org/"
+		  xmlns="http://www.opengis.net/wfs/2.0"
+		  xmlns:xlink="http://www.w3.org/1999/xlink"
+		  xmlns:ows="http://www.opengis.net/ows/1.1"
+		  xmlns:gml="http://www.opengis.net/gml"
+		  xmlns:fes="http://www.opengis.net/fes/2.0"
+		  xmlns:ogc="http://www.opengis.net/ogc" 
+		  xmlns:csml="http://ndg.nerc.ac.uk/csml" version="2.0.0">
+  <!--! TODO: declare csml namespace on the fly -->
+	
+  <!--! ====================================================================== -->
+  <!--!
+      To change the tag name we need to wrap a markup macro in a python
+      function
+  -->
+
+  <Operation py:def="_opContent(op)">
+    <Format py:for="f in op.parameters['Format'].possibleValues.allowedValues" py:content="f"/>
+    <DCPType><HTTP>
+      <Get>
+	<OnlineResource xlink:type="simple" xlink:href="${op.get.href}"/>
+      </Get>
+    </HTTP></DCPType>
+  </Operation>
+  <?python
+  
+  def markupOperation(opName, op):
+    """Render an OWS operation description for the Capabilities section.
+    """
+
+    return RenameElementFilter(QName(opName))(_opContent(op))
+
+  ?>
+
+	  <FeatureType py:def="markupLayer(ds)">
+		<Name py:content="ds.identifier"/>
+		<Title py:content="ds.titles[0]"/>
+		<Abstract py:if="len(ds.abstracts)>0" py:content="ds.abstracts[0]"/>
+		<ows:Keywords>
+			<ows:Keyword py:for="kw in ds.keywords" py:content="kw"/>			
+		</ows:Keywords>		
+		<DefaultCRS>WGS:84</DefaultCRS>
+		<OutputFormats>
+			<Format py:for="format in ds.outputformats" py:content="format"/>
+		</OutputFormats>	
+		<?python exBBox = ds.wgs84BoundingBoxes[0]?>
+		<ows:WGS84BoundingBox>
+		  <ows:LowerCorner py:content="str(exBBox.lowerCorner[0]) + ' ' + str(exBBox.lowerCorner[1])" />
+		  <ows:UpperCorner py:content="str(exBBox.upperCorner[0]) + ' ' + str(exBBox.upperCorner[1])" />
+		</ows:WGS84BoundingBox>
+	  </FeatureType>
+  <!--! ====================================================================== -->
+
+
+  <ows:ServiceIdentification py:with="sm=c.capabilities; si=c.capabilities.serviceIdentification">
+    <ows:Title py:content="si.titles[0]"/>
+    <ows:Abstract py:if="len(si.abstracts)>0" py:content="si.abstracts[0]"/>
+    <ows:Keywords py:if="len(si.keywords)>0">
+      <ows:Keyword py:for="kw in si.keywords"
+	       py:content="kw"/>
+    </ows:Keywords>
+    <!--! <OnlineResource xlink:type="simple" xlink:href="${url.current(qualified=True, action='index')}?"/> -->
+    <ows:ServiceType>OGC:WFS</ows:ServiceType>
+	<ows:ServiceTypeVersion>2.0.0</ows:ServiceTypeVersion>
+    <ows:Fees py:content="si.fees"/>
+    <ows:AccessConstraints py:content="si.accessConstraints"/>
+  </ows:ServiceIdentification>
+  <ows:ServiceProvider py:with="sm=c.capabilities; rp=sm.serviceProvider.serviceContact">
+    <ows:ProviderName py:content="sm.serviceProvider.providerName"/>
+    <ows:ServiceContact>
+		<ows:IndividualName py:if="rp is not None" py:content="rp.individualName"/>
+		<ows:PositionName py:content="rp.positionName"/>
+		<py:with vars="cn=rp.contactInfo" py:if="rp.contactInfo is not None">
+		<ows:ContactInfo py:if="cn.phone is not None">
+			<ows:Phone>
+				<ows:Voice py:content="cn.phone.voice"/>
+				<ows:Facsimile py:content="cn.phone.facsimile"/>
+			</ows:Phone>
+			<ows:Address py:if="cn.address is not None">
+				  <ows:DeliveryPoint><py:for each="d in cn.address.deliveryPoints">${d}</py:for>
+				  </ows:DeliveryPoint>
+				  <ows:City py:content="cn.address.city"/>
+				  <ows:AdministrativeArea py:content="cn.address.administrativeArea"/>
+				  <ows:PostalCode py:content="cn.address.postalCode"/>
+				  <ows:Country py:content="cn.address.country"/>
+				  <ows:ElectronicMailAddress py:content="cn.address.electronicMailAddress"/>							  
+			</ows:Address>	
+		</ows:ContactInfo>
+		</py:with>	
+    </ows:ServiceContact>
+  </ows:ServiceProvider>	
+	
+  <!--! These fields are represented in ows_common as service constraints -->
+  
+  <ows:OperationsMetadata py:with="sm=c.capabilities; om=sm.operationsMetadata">
+    <py:if test="om is not None">
+      <?python
+	ops = ['GetCapabilities', 'DescribeFeature', 'GetFeature', 'DescribeStoredQueries', 'ListStoredQueries', 'GetPropertyValue']
+	eops = [x for x in om.operationDict.keys() if x not in ops]
+      ?>
+      <py:for each="opName in ops" py:if="opName in om.operationDict.keys()">
+          <ows:Operation name="${opName}">
+          	<ows:DCP>
+          		<ows:HTTP>
+          			<ows:Get  xlink:type="simple" xlink:href="${om.operationDict[opName].get.href}"/>
+          		</ows:HTTP>
+          	</ows:DCP>
+          </ows:Operation>
+      </py:for> 
+      <ows:ExtendedCapabilities>      
+      <Request>
+	<py:for each="opName in eops">
+	  <span py:content="markupOperation(opName, om.operationDict[opName])" py:strip="True"/>
+	</py:for>
+	<py:for each="opName in eops">
+	  <?python exceptions = om.operationDict[opName].parameters.get('ExceptionFormat') ?>
+	  <Exception py:if="exceptions is not None">
+	    <Format py:for="e in exceptions.possibleValues.allowedValues"
+		    py:content="e"/>
+	  </Exception>
+	</py:for>
+      </Request>
+      </ows:ExtendedCapabilities>
+    </py:if>
+    </ows:OperationsMetadata>
+    
+    <FeatureTypeList py:if="c.capabilities.contents is not None">
+      <FeatureType py:for="ds in c.capabilities.contents.datasetSummaries"
+	     py:replace="markupLayer(ds)">
+      </FeatureType>
+    </FeatureTypeList> 
+	<!-- TODO, Filter_Capabilities -->		
+	<fes:Filter_Capabilities>
+		<fes:Id_Capabilities>
+				<fes:ResourceIdentifier name="blah"/>
+		</fes:Id_Capabilities>
+		<fes:Spatial_Capabilities>
+			<fes:GeometryOperands>
+				<fes:GeometryOperand name="blah2"/>
+			</fes:GeometryOperands>
+			<fes:SpatialOperators>
+				<fes:SpatialOperator name="BBOX"/>
+			</fes:SpatialOperators>
+		</fes:Spatial_Capabilities>
+		<fes:Temporal_Capabilities>
+			<fes:TemporalOperands>
+				<fes:TemporalOperand name="blah3"/>
+			</fes:TemporalOperands>
+			<fes:TemporalOperators>
+				<fes:TemporalOperator name="After"/>
+			</fes:TemporalOperators>
+		</fes:Temporal_Capabilities>		
+	</fes:Filter_Capabilities>
+</WFS_Capabilities>

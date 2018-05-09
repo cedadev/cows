@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<?python 
+from genshi import XML
+?>
+
+<!--! TODO: BoundingBox needed. This should be calculated at the same time as the resultset-->
+
+<wfs:FeatureCollection xmlns:py="http://genshi.edgewall.org/"
+		  xmlns:wfs="http://www.opengis.net/wfs"
+		  xmlns:gml="http://www.opengis.net/gml"
+		  xmlns:csml="http://ndg.nerc.ac.uk/csml">	
+	<wfs:member py:for="feature in c.resultset"
+	     py:content="XML(feature.toGML())"/>
+	<wfs:AdditionalObjects>
+		<wfs:member py:for="addobj in c.additionalobjects"
+			py:content="XML(addobj)"/>
+	</wfs:AdditionalObjects>
+</wfs:FeatureCollection>
+		  
+		  

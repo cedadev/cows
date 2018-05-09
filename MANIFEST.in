@@ -1,0 +1,1 @@
+recursive-include cows/pylons/templates *

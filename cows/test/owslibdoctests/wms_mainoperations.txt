@@ -1,0 +1,67 @@
+COWS Web Map Service doctest
+============================
+
+WMS Version 1.1.1
+=================
+
+
+    >>> from owslib.wms import WebMapService
+    >>> wms=WebMapService('http://localhost:5000/famous/wms', version='1.1.1')
+    >>> wms.url
+    'http://localhost:5000/famous/wms'
+    >>> wms.version
+    '1.1.1'
+    >>> wms.identification.type
+    'OGC:WMS'
+    >>> wms.identification.version
+    '1.1.1'
+    >>> wms.identification.title
+    'CSML test server'
+    >>> wms.identification.abstract
+    >>> wms.identification.keywords
+    []
+    >>> wms.provider.name
+    'British Atmospheric Data Centre'
+    >>> wms.provider.url
+    'http://localhost:5000/famous/wms?'
+    >>> wms.provider.contact.email
+    'D.Lowe@rl.ac.uk'
+    >>> wms.provider.contact.name
+    'Dominic Lowe'
+    >>> wms.provider.contact.organization
+    'British Atmospheric Data Centre'
+    >>> wms.provider.contact.address
+    '\n\t    STFC Rutherford Appleton Laboratory\n\t  '
+    >>> wms.provider.contact.city
+    'Didcot'
+    >>> wms.provider.contact.region
+    'Oxfordshire'
+    >>> wms.provider.contact.postcode
+    'OX11 0QX'
+    >>> wms.provider.contact.country
+    'UK'
+    >>> for item in wms.items(): print item[0]
+    None
+    sea_ice_thickness
+    air_temperature
+    sea_water_salinity
+    cloud_area_fraction
+    >>> layer=wms['sea_water_salinity']
+    >>> layer.title
+    'sea_water_salinity'
+    >>> layer.keywords
+    []
+    >>> layer.boundingBox
+    (-180.0, -90.0, 180.0, 90.0, 'EPSG:4326')
+    >>> layer.timepositions[0]
+    '2793-06-01T00:00:00.0'
+    >>> wms.getOperationByName('GetMap').formatOptions
+    ['image/gif', 'image/png', 'image/jpg', 'image/tiff']
+    >>> output=wms.getmap(layers=['sea_water_salinity'],time='2982-11-16T00:00:00.0',bbox=(-150,-80,150,80), srs='EPSG:4326', format='image/png',size=(300, 250))  
+    >>> f=open('testimage.png', 'wb')
+    >>> f.write(output.read())
+    >>> f.close()
+
+
+
+

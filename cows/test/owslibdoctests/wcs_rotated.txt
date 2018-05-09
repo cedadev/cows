@@ -1,0 +1,69 @@
+COWS Web Coverage Service doctest
+============================
+
+WCS Version 1.0.0
+=================
+
+
+    >>> from owslib.wcs import WebCoverageService
+    >>> wcs=WebCoverageService('http://localhost:5000/rotated/wcs', version='1.0.0')
+    >>> wcs.url
+    'http://localhost:5000/rotated/wcs'
+    >>> wcs.version
+    '1.0.0'
+    >>> wcs.identification.service
+    'OGC:WCS'
+    >>> wcs.identification.version
+    '1.0.0'
+    >>> wcs.identification.title
+    'OGC:WCS'
+    >>> wcs.identification.abstract
+    >>> wcs.identification.keywords
+    []
+    >>> wcs.identification.fees
+    >>> wcs.identification.accessConstraints
+    >>> wcs.provider.name
+    'British Atmospheric Data Centre'
+    >>> wcs.provider.url
+    'British Atmospheric Data Centre'
+    >>> wcs.provider.contact.email
+    'D.Lowe@rl.ac.uk'
+    >>> wcs.provider.contact.name
+    'Dominic Lowe'
+    >>> wcs.provider.contact.organization
+    'British Atmospheric Data Centre'
+    >>> wcs.provider.contact.address
+    'STFC Rutherford Appleton Laboratory'
+    >>> wcs.provider.contact.city
+    'Didcot'
+    >>> wcs.provider.contact.region
+    'Oxfordshire'
+    >>> wcs.provider.contact.postcode
+    'OX11 0QX'
+    >>> wcs.provider.contact.country
+    'UK'
+    >>> for item in wcs.items(): print item[0]
+    temp
+    >>> cvg=wcs['temp']
+    >>> cvg.title
+    'temp'
+    >>> cvg.keywords
+    []
+    >>> wcs.identification.accessConstraints
+    >>> wcs.identification.fees
+    >>> cvg.boundingBoxWGS84
+    (-180.0, 90.0, 180.0, 90.0)
+    >>> cvg.timelimits
+    ['1983-08-01T12:00:00.0Z', '1983-08-30T12:00:00.0Z']
+    >>> cvg.supportedFormats
+    ['cf-netcdf']
+    >>> cvg.supportedCRS
+    ['ndg:crs:rotatedpole']
+    >>> output=wcs.getCoverage(identifier='temp',time=['1983-08-01T12:00:00.0'],bbox=(344,0,347,4), crs='ndg:crs:rotatedpole', format='cf-netcdf')
+    >>> f=open('test.nc', 'wb')
+    >>> f.write(output.read())
+    >>> f.close()
+
+
+
+

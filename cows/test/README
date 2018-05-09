@@ -1,0 +1,24 @@
+Package Organisation
+====================
+
+COWS is divided into the following package hierarchy:
+
+ - cows: top-level package
+ - model: Classes reflecting the OWS common data model
+ - pylons: Components designed to work within the pylons web framework
+ - service: Components implementing OGC services and backends.  Note code in this package shouldn't reference pylons.
+ - test: The COWS test harness (see below)
+ - xml: Parsing capabilities xml into cows.model classes
+
+Testing COWS
+============
+
+Tests that do not require Pylons can be placed in this directory to be
+discovered by nose.  
+
+Those tests that need Pylons should be created in the testapp
+directory.  testapp is a Pylons application specifically to wrap
+tests.  When you run "nosetests cows" it will create the testapp
+application and run the tests in the testapp/tests directory.
+
+

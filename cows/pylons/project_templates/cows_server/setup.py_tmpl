@@ -1,0 +1,32 @@
+try:
+    from setuptools import setup, find_packages
+except ImportError:
+    from ez_setup import use_setuptools
+    use_setuptools()
+    from setuptools import setup, find_packages
+
+setup(
+    name='{{egg}}',
+    version="",
+    #description='',
+    #author='',
+    #author_email='',
+    #url='',
+    find_links=['http://ndg.nerc.ac.uk/dist'],
+    install_requires=["Pylons>=0.9.6.1", 'csml', 'genshi'],
+    packages=find_packages(exclude=['ez_setup']),
+    include_package_data=True,
+    test_suite='nose.collector',
+    package_data={'{{package}}': ['i18n/*/LC_MESSAGES/*.mo']},
+    #message_extractors = {'{{package}}': [
+    #        ('**.py', 'python', None),
+    #        ('templates/**.mako', 'mako', None),
+    #        ('public/**', 'ignore', None)]},
+    entry_points="""
+    [paste.app_factory]
+    main = {{package}}.config.middleware:make_app
+
+    [paste.app_install]
+    main = pylons.util:PylonsInstaller
+    """,
+)

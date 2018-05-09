@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+
+<?python
+
+from cows.pylons.genshi_util import RenameElementFilter
+from genshi import QName
+from pylons import url
+
+?>
+
+<ViewContext xmlns:py="http://genshi.edgewall.org/"
+		     xmlns="http://www.opengis.net/context"
+		     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		     xmlns:xlink="http://www.w3.org/1999/xlink" 
+		     xsi:schemaLocation="http://www.opengis.net/context http://schemas.opengis.net/context/1.1.0/context.xsd"
+		     version="1.1.0"
+		     id="url.current()">
+
+  <!--!TODO: Queriable if GetFeatureInfo is present -->
+  <Layer py:def="markupLayer(ds)"
+	  queryable="${int(ds.queryable)}" hidden="false">
+    <Server service="OGC:WMS" version="1.1.1">
+      <OnlineResource xlink:type="simple"
+		      xlink:href="${url.current(qualified=True, action='index')}"/>
+    </Server>
+    <Name py:content="ds.identifier"/>
+    <Title py:content="ds.titles[0]"/>
+    <Abstract py:if="len(ds.abstracts)>0" py:content="ds.abstracts[0]"/>
+    <SRS py:for="crs in ds.CRSs" py:content="crs"/>
+
+    <?python
+    op = c.capabilities.operationsMetadata.operationDict['GetMap']
+    formats = op.parameters['Format'].possibleValues.allowedValues
+    ?>
+    <FormatList>
+      <Format py:for="f in formats" py:content="f"/>
+    </FormatList>
+    
+    <DimensionList>
+    <py:for each="d_n, d in ds.dimensions.iteritems()">
+      <?python
+      default = d.defaultValue
+      if default is None:
+          default = d.possibleValues.allowedValues[0]
+      ?>
+      <Dimension name="${d_n}" units="${d.valuesUnit}"
+		 unitSymbol="${d.unitSymbol}"
+		 userValue="default"
+		 py:content="','.join(d.possibleValues.allowedValues)"/>
+    </py:for>
+    </DimensionList>
+    <DataURL>
+		<OnlineResource py:if="len(ds.dataURLs)>0" format="${ds.dataURLs[0].format}" xlink:href="${ds.dataURLs[0].onlineResource}"/>
+	</DataURL>
+    
+  </Layer>
+
+
+  <General>
+    <?python bb = c.bbox ?>
+    <BoundingBox SRS="${bb.crs}"
+		 minx="${'%.2f'%bb.lowerCorner[0]}"
+		 miny="${'%.2f'%bb.lowerCorner[1]}"
+		 maxx="${'%.2f'%bb.upperCorner[0]}"
+		 maxy="${'%.2f'%bb.upperCorner[1]}"/>
+    
+    <?python sm=c.capabilities; si=c.capabilities.serviceIdentification ?>
+    <Title py:content="si.titles[0]"/>
+    <!--!TODO: LogoURL -->
+  </General>
+  <LayerList>
+    <!--!TODO: Allow layer subsets to be listed in WMC -->
+    <Layer py:for="ds in sm.contents.datasetSummaries"
+	   py:replace="markupLayer(ds)"/>
+  </LayerList>
+</ViewContext>

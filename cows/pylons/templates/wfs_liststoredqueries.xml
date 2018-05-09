@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<?python 
+from genshi import XML
+from cows.pylons.genshi_util import RenameElementFilter
+?>
+
+<!--! TODO, featuretype specific xml namespace declaration -e.g. csml: must be done on the fly. Must be present to qualify Qnames in returnFeatureType-->
+<ListStoredQueriesResponse xmlns="http://www.opengis.net/wfs/2.0" xmlns:py="http://genshi.edgewall.org/" xmlns:csml="http://ndg.nerc.ac.uk/csml">
+	<py:for each="queryid in c.storedqueries">
+		<?python 
+		querydesc=c.storedqueries[queryid][0] 
+		?>
+          <StoredQuery id="${queryid}">
+			  <Title py:content="querydesc.title"/>
+  			  <ReturnFeatureType py:content="querydesc.queryExpressionText.returnFeatureType"/> 
+		  </StoredQuery>
+    </py:for> 
+</ListStoredQueriesResponse>

@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<?python
+
+from cows.pylons.genshi_util import RenameElementFilter
+from genshi import QName
+?>
+
+<!--! TODO: This currently looks like WMS, change to WCS based on old kid template -->
+
+<WCS_Capabilities xmlns:py="http://genshi.edgewall.org/" xmlns="http://www.opengis.net/wcs"
+  xmlns:gml="http://www.opengis.net/gml" version="1.0.0">
+
+  <!--! ====================================================================== -->
+  <!--!
+      To change the tag name we need to wrap a markup macro in a python
+      function
+  -->
+
+  <Operation py:def="_opContent(op)">
+    <Format py:for="f in op.parameters['Format'].possibleValues.allowedValues" py:content="f"/>
+    <DCPType>
+      <HTTP>
+        <Get>
+          <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple"
+            xlink:href="${op.get.href}"/>
+        </Get>
+      </HTTP>
+    </DCPType>
+  </Operation>
+  <?python def markupOperation(opName, op):
+    """Render an OWS operation description for the Capabilities section.
+    """
+
+    return RenameElementFilter(QName(opName))(_opContent(op))
+
+  ?>
+
+  <CoverageOfferingBrief py:def="markupLayer(ds)">
+    <name py:content="ds.identifier"/>
+    <label py:content="ds.titles[0]"/>
+    <abstract py:if="len(ds.abstracts)>0" py:content="ds.abstracts[0]"/>
+    <SRS py:for="crs in ds.CRSs" py:content="crs"/>
+    <py:for each="bb in ds.wgs84BoundingBoxes">
+      <lonLatEnvelope>
+        <gml:pos>${'%.2f'%bb.lowerCorner[0]} ${'%.2f'%bb.lowerCorner[1]}</gml:pos>
+        <gml:pos>${'%.2f'%bb.upperCorner[0]} ${'%.2f'%bb.upperCorner[1]}</gml:pos>
+        <gml:timePosition>${str(ds.timeLimits[0])}</gml:timePosition>
+        <gml:timePosition>${str(ds.timeLimits[1])}</gml:timePosition>
+      </lonLatEnvelope>
+    </py:for>
+  </CoverageOfferingBrief>
+
+  <!--! ====================================================================== -->
+
+
+  <Service py:with="sm=c.capabilities; si=c.capabilities.serviceIdentification">
+    <description py:if="len(si.abstracts)>0" py:content="si.abstracts[0]"/>
+    <name>OGC:WCS</name>
+    <label py:content="si.titles[0]"/>
+    <keywords py:if="len(si.keywords) is not 0">
+      <keyword py:for="kw in si.keywords" py:content="kw"/>
+    </keywords>
+
+    <responsibleParty py:if="sm.serviceProvider is not None"
+      py:with="rp=sm.serviceProvider.serviceContact">
+      <individualName py:if="rp is not None" py:content="rp.individualName"/>
+      <organisationName py:content="sm.serviceProvider.providerName"/>
+      <positionName py:content="rp.positionName"/>
+
+      <py:with vars="cn=rp.contactInfo" py:if="rp.contactInfo is not None">
+        <contactInfo>
+          <phone>
+            <voice py:if="cn.phone is not None" py:content="cn.phone.voice"/>
+            <facsimile py:if="cn.phone is not None" py:content="cn.phone.facsimile"/>
+          </phone>
+          <address py:if="cn.address is not None">
+			<deliveryPoint><py:for each="d in cn.address.deliveryPoints">${d}</py:for></deliveryPoint>
+			<city py:content="cn.address.city"/>
+			<administrativeArea py:content="cn.address.administrativeArea"/>
+			<postalCode py:content="cn.address.postalCode"/>
+			<country py:content="cn.address.country"/>
+			<electronicMailAddress py:if="cn.address is not None" py:content="cn.address.electronicMailAddress"/>
+		</address>
+        </contactInfo>
+      </py:with>
+    </responsibleParty>
+
+    <fees py:content="si.fees"/>
+    <accessConstraints py:content="si.accessConstraints"/>
+  </Service>
+
+  <!--! These fields are represented in ows_common as service constraints -->
+  <Capability py:with="sm=c.capabilities; om=sm.operationsMetadata">
+    <py:if test="om is not None">
+      <?python ops = ['GetCapabilities', 'DescribeCoverage', 'GetCoverage'] ?>
+      <Request>
+        <py:for each="opName in ops" py:if="opName in om.operationDict.keys()">
+          <span py:content="markupOperation(opName, om.operationDict[opName])" py:strip="True"/>
+        </py:for>
+        <py:for each="opName in ops" py:if="opName in om.operationDict.keys()">
+          <?python exceptions = om.operationDict[opName].parameters.get('ExceptionFormat') ?>
+          <Exception py:if="exceptions is not None">
+            <Format py:for="e in exceptions.possibleValues.allowedValues" py:content="e"/>
+          </Exception>
+        </py:for>
+      </Request>
+    </py:if>
+
+    <!--!TODO:  capability exceptions -->
+    <Exception>
+      <Format>text/xml</Format>
+    </Exception>
+  </Capability>
+  <py:with vars="sm=c.capabilities">
+    <ContentMetadata py:if="sm.contents is not None">
+      <Title>Contents</Title>
+      <CoverageOfferingBrief py:for="ds in sm.contents.datasetSummaries"
+        py:replace="markupLayer(ds)"> </CoverageOfferingBrief>
+    </ContentMetadata>
+  </py:with>
+</WCS_Capabilities>

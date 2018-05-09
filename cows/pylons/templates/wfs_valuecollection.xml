@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<?python 
+from genshi import XML
+	
+def wrapXML(content):
+	#if the string content looks like it contains XML element nodes, then wrap it using the genshi XML function
+	#else just return the string
+	if content[:1]=='<':
+	    return XML(content)
+	else:
+	    return content
+
+	
+?>
+
+<!--! TODO: BoundingBox needed. This should be calculated at the same time as the resultset-->
+
+<wfs:ValueCollection xmlns:py="http://genshi.edgewall.org/"
+		  xmlns:wfs="http://www.opengis.net/wfs"
+		  xmlns:gml="http://www.opengis.net/gml"
+		  xmlns:csml="http://ndg.nerc.ac.uk/csml"
+		  numberReturned="${len(c.resultset)}">	
+	<wfs:member py:for="feature in c.resultset"
+	     py:content="wrapXML(feature)"/>
+</wfs:ValueCollection>
+		  
+		  
