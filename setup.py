@@ -6,23 +6,20 @@
 # the full license text.
 
 from setuptools import setup, find_packages
+from cows import __version__
 
 setup(
     name='cows',
-    version='2.0.0',
+    version=__version__,
     
     description='CEDA OGC Web Services Framework (COWS).  A framework for creatining integrated OGC web services using Pylons',
-    author='Stephen Pascoe',
-    author_email='S.Pascoe@rl.ac.uk',
-    url='http://proj.badc.rl.ac.uk/ndg/wiki/OwsFramework',
+    author='Ag Stephens',
+    author_email='ag.stephens@stfc.ac.uk',
+    url='https://github.com/cedadev/cows',
 
     # We only list dependencies that we are confident will easy_install without
     # a hitch here.
-    install_requires=['Pylons>=1.0', 'genshi>=0.6', 'numpy>=1.3.0', 'cdat_lite>=5.2', 'csml>=2.7',
-                      'pycairo>=1.2', 'Shapely>=1.2.5', 'PIL>=1.1.7', 
-                      'matplotlib>=1.0.0', 'basemap>=1.0.0',
-                      'mock>=0.6', 'owslib>=0.3.1', 'geoplot>=0.4.0', 'image_utils>=1.0'],
-    find_links=['http://ndg.nerc.ac.uk/dist'],
+    install_requires=['Pylons>=1.0', 'genshi>=0.6', 'mock>=0.6', 'owslib>=0.3.1'],
 
     classifiers=[
     'Development Status :: 4 - Beta',
